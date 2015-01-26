@@ -14,6 +14,9 @@ import amlibs.core.actor.ActorStack
 import amlibs.core.playspecific.PlayMixin
 import doapi.daos.CoordinateInfoDao
 import com.google.inject.Inject
+import amlibs.core.daos.JsonQueryHelper
+import play.api.libs.json.Json
+import scala.concurrent.Future
 
 /**
  * from website:
@@ -30,11 +33,26 @@ object CoordinateConvertActor {
     def toId = s"${northings}_${eastings}"
   }
   case class HK1980GRIDtoWGS84Resp(lat: Double, long: Double, reqMeta: Option[Map[String, Any]])
+
+  object CoordinateInfo {
+    val f_northings = "northings"
+    val f_eastings = "eastings"
+    val f_lat = "lat"
+    val f_long = "lng"
+
+    def create(n: Double, e: Double, lat: Double, long: Double) = {
+      Json.obj(f_northings -> n, f_eastings -> e, f_lat -> lat, f_long -> long)
+    }
+  }
 }
 
 class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) extends ActorStack with PlayMixin {
   import CoordinateConvertActor._
+  import JsonQueryHelper._
+
   val formUrl = conf.getString("dataoneapi.traffic.convertFormUrl").getOrElse("http://www.geodetic.gov.hk/smo/tform/tform.aspx")
+
+  val BATCH_SIZE = 10
 
   var cnt = 0
 
@@ -76,7 +94,7 @@ class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) ex
 
         var processingItems: List[((HK1980GRIDtoWGS84Request, ActorRef), String, String)] = List()
 
-        def genTextboxMap(acc: Map[String, String], cnt: Int): Map[String, String] = if (cnt > 10) {
+        def genTextboxMap(acc: Map[String, String], cnt: Int): Map[String, String] = if (cnt > BATCH_SIZE) {
           acc
         } else {
           val currentText1 = s"TextBox${cnt}1"
@@ -110,18 +128,37 @@ class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) ex
 
           var map: Map[String, String] = Map.empty
           if (queue.size > 0) {
-            val item = queue.dequeue
-            processingItems ::= (item, targetLat, targetLong)
-            map = acc ++ Map(
-              currentText1 -> item._1.toId,
-              currentText2 -> item._1.northings.toString,
-              currentText3 -> item._1.eastings.toString)
+            try {
+
+              val item = queue.front
+
+              log.debug("processing current item: " + item)
+              processingItems ::= (item, targetLat, targetLong)
+              map = acc ++ Map(
+                currentText1 -> item._1.toId,
+                currentText2 -> item._1.northings.toString,
+                currentText3 -> item._1.eastings.toString)
+
+              queue.dequeue
+
+            } catch {
+              case e: Exception =>
+                log.error("Exception: " + e.getMessage)
+                map = acc ++ Map(
+                  currentText1 -> "",
+                  currentText2 -> "",
+                  currentText3 -> "")
+
+                log.error("why item is null? queue dump, should send mail to admin, resetting all case inside queue")
+                queue = Queue.empty
+            }
 
           } else {
             map = acc ++ Map(
               currentText1 -> "",
               currentText2 -> "",
               currentText3 -> "")
+
           }
           genTextboxMap(map, cnt + 1)
         }
@@ -143,7 +180,13 @@ class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) ex
               val result2 = pattern2.findFirstMatchIn(rs.body) map { _ group 1 }
 
               val requestor = item._1._2
-              requestor ! HK1980GRIDtoWGS84Resp(result1.get.toDouble, result2.get.toDouble, item._1._1.reqMeta)
+              val lat = result1.get.toDouble
+              val long = result2.get.toDouble
+
+              val js = CoordinateInfo.create(item._1._1.northings, item._1._1.eastings, lat, long)
+              coordinateInfoDao.insert(js) map { id =>
+                requestor ! HK1980GRIDtoWGS84Resp(lat, long, item._1._1.reqMeta)
+              }
             //              log.debug(result1.get)
             //              log.debug(result2.get)
           }
@@ -154,12 +197,34 @@ class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) ex
 
       }
 
-      if (started) {
-        Akka.system.scheduler.scheduleOnce(Duration(1, "second"), self, "batch")
-      }
+      if (started && queue.size > 0) {
+        Akka.system.scheduler.scheduleOnce(Duration(300, "millis"), self, "batch")
+      } else started = false
 
     case req: HK1980GRIDtoWGS84Request =>
-      if (!started) self ! "start"
-      queue.enqueue((req, sender))
+
+      val requestor = sender
+      import CoordinateInfo._
+      val q = qEq(f_northings, req.northings) ++ qEq(f_eastings, req.eastings)
+      coordinateInfoDao.findFirst(q).map {
+        case Some(item) =>
+          log.debug("data exists in db, sending record back")
+          val lat = (item._1 \ f_lat).as[Double]
+          val long = (item._1 \ f_long).as[Double]
+          requestor ! HK1980GRIDtoWGS84Resp(lat, long, req.reqMeta)
+
+        case None =>
+          log.info("data does not exist in db, query the web service")
+          queue.enqueue((req, requestor))
+      }
+
+      // create a non-blocking wait
+      Future.successful {
+        if (!started) {
+          Thread.sleep(100)
+          self ! "start"
+        }
+      }
+
   }
 }

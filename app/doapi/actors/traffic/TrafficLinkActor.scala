@@ -14,6 +14,7 @@ import play.api.libs.ws.WS
 import play.api.libs.json.JsObject
 import scala.concurrent.duration.Duration
 import amlibs.core.playspecific.PlayMixin
+import doapi.models.ModelCommon
 
 /**
  * an actor to keep track of the link node from following link:
@@ -53,8 +54,7 @@ object TrafficLinkActor extends PlayMixin {
 
 object MyWriter {
   implicit val anyValWriter = Writes[Any](a => a match {
-    case v: String =>
-      println("detected string: " + v); Json.toJson(v)
+    case v: String => Json.toJson(v)
     case v: Int => Json.toJson(v)
     case v: JsString => v
     case v: Double => Json.toJson(v)
@@ -75,7 +75,8 @@ object MyWriter {
   })
 
   implicit val linkNodeWriter = Writes[LinkNode](a => a match {
-    case v: LinkNode => Json.obj("linkId" -> v.linkId,
+    case v: LinkNode => Json.obj(
+      "linkId" -> v.linkId,
       "startNode" -> v.startNode,
       "startNodeEastings" -> v.startNodeEastings,
       "startNodeNorthings" -> v.startNodeNorthings,
@@ -96,12 +97,17 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
     case req: HK1980GRIDtoWGS84Resp =>
       req.reqMeta.map { m =>
         val linkId = m("linkId").toString
-        trafficLinkDao.findFirst(Json.obj("linkId" -> linkId)) map { linkNode =>
-          if (linkNode.isDefined) {
-            trafficLinkDao.batchUpdate(Json.obj("linkId" -> linkId), linkNode.get._1 ++ Json.obj("lat" -> req.lat, "lng" -> req.long)) map { le =>
-              log.debug("updated linkId with latLong : " + req.lat + "," + req.long)
+        log.info(s"checking the linkID: $linkId from resp: $req")
+        trafficLinkDao.findFirst(Json.obj("linkId" -> linkId)) map {
+          case Some(linkNode) =>
+            val upd = Json.obj("lat" -> req.lat, "lng" -> req.long, ModelCommon.state.name -> ModelCommon.state.v_ready)
+            log.info(s"found some linkNode with linkId: $linkId with dataToUpdate: $upd")
+            trafficLinkDao.updatePartial(linkNode._2, upd) map { le =>
+              log.info("updated linkId with latLong : " + req.lat + "," + req.long)
             }
-          }
+          case None =>
+            log.info(s"There is no such linkId exist in db: $linkId")
+
         }
       }
 
@@ -109,6 +115,7 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
       val requestor = self
       val originator = sender
       WS.url(DATASETURL).get().map { r =>
+        log.info(s"received xls response from $DATASETURL")
         val rawResp = r.underlying[Response]
         var stream = rawResp.getResponseBodyAsStream()
 
@@ -123,12 +130,14 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
 
           val linkID = row.getCell(0).toString()
 
-          if (linkID.equalsIgnoreCase("link id")) {
-            log.debug("skipping header line")
+          val col2 = row.getCell(1).toString()
+          if (linkID.equalsIgnoreCase("link id") || col2.startsWith("出發")) {
+            log.debug(s"skipping header line : $linkID and $col2")
           } else {
 
-            Await.result(trafficLinkDao.findFirst(Json.obj("linkId" -> linkID)) map { nodeOpt =>
+            Await.result(trafficLinkDao.findFirst(Json.obj("linkId" -> linkID, ModelCommon.state.name -> ModelCommon.state.v_ready)) map { nodeOpt =>
               log.debug("after query with isDefined: " + nodeOpt.isDefined)
+              
               if (!nodeOpt.isDefined) {
 
                 val startNode = row.getCell(1).toString()

@@ -41,7 +41,7 @@ class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao) extends ActorSt
                   val updatedJs = js ++ Json.obj("id" -> id)
                   requestor ! "ok"
                 }
-              case Some(x) => requestor ! "ok"
+              case Some(x) => requestor ! "ok - discarded as duplicated"
             }
           }
         }
