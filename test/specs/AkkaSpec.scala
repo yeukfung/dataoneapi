@@ -16,6 +16,7 @@ import scala.concurrent.Awaitable
 import play.api.test.FakeApplication
 import play.api.Play
 import scala.concurrent.Future
+import amlibs.core.daos.JsonQueryHelper
 /* A tiny class that can be used as a Specs2 'context'. 
  * From: http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/
  * I don't think we need it as we will be testing under Play context, 
@@ -58,6 +59,8 @@ trait ShortCodeUtil {
 }
 
 trait TestDBMixin extends ShortCodeUtil {
+  
+  
   def dbName = "dummy"
 
   implicit val dur = Duration(5, "seconds")

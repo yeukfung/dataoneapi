@@ -14,6 +14,7 @@ import amlibs.core.RESTAPI
 import amlibs.core.daos.vendors.reactivemongo.ReactiveMongoREST
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
+import amlibs.core.playspecific.PlayMixin
 
 trait ReactiveMongoDao[T] extends RESTAPI[T, String, JsObject, JsObject, LastError]
 
@@ -133,12 +134,18 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
   }
 
   override def batchUpdate(sel: JsObject, upd: JsObject)(implicit ctx: ExecutionContext): Future[LastError] = {
+    val upd1 = JsonQueryHelper.qEq("$set", upd)
     coll.update(
       sel,
-      upd,
+      upd1,
       multi = true)
   }
 
   def findFirst(sel: JsObject = Json.obj())(implicit ctx: ExecutionContext) = this.find(sel).map { _.headOption }
+
+  def markState(id: String, stateJs: JsObject)(implicit ctx: ExecutionContext): Future[Unit] = {
+    val upd = stateJs
+    this.updatePartial(id, upd)
+  }
 
 }

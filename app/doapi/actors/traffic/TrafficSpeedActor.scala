@@ -19,8 +19,6 @@ class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao) extends ActorSt
   val SPEEDXML_URL = conf.getString("dataoneapi.traffic.speedxmlurl").getOrElse("http://data.one.gov.hk/others/td/speedmap.xml")
 
   def ops = {
-
-    case TrafficActor.ProcessDownloadedSpeedData =>
       
     case TrafficActor.DownloadSpeedData =>
 

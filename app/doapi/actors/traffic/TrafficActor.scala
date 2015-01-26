@@ -8,15 +8,18 @@ object TrafficActor {
   case object DownloadSpeedData
   case object SyncLinkData
 
-  case object ProcessDownloadedSpeedData
+  case class ProcessDownloadedSpeedData(batchSize: Int)
 
 }
 
-class TrafficActor @Inject() (speedActor: ActorInstance[TrafficSpeedActor], syncLDActor: ActorInstance[TrafficLinkActor]) extends ActorStack {
+class TrafficActor @Inject() (speedActor: ActorInstance[TrafficSpeedActor], syncLDActor: ActorInstance[TrafficLinkActor], processingActor: ActorInstance[TrafficSpeedProcessingActor]) extends ActorStack {
 
   import TrafficActor._
 
   def ops = {
+    case msg: ProcessDownloadedSpeedData =>
+      processingActor.ref forward msg
+      
     case msg @ DownloadSpeedData =>
       speedActor.ref forward msg
 

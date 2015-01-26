@@ -33,3 +33,5 @@ libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.
 libraryDependencies += "org.apache.poi" % "poi" % "3.9"
 
 libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.39.0"
+
+libraryDependencies += "io.spray" %%  "spray-json" % "1.3.1"

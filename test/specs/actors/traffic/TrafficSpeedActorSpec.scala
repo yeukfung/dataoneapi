@@ -35,9 +35,9 @@ class TrafficSpeedActorSpec extends AkkaSpec("TrafficSpeedActor") with TestDBMix
       this.expectMsg("ok")
       val list = r(dao.find(Json.obj()))
       list.size must_== 1
-      val status = list.head._1 \ SpeedMap.f_status
+      val status = list.head._1 \ SpeedMap.f_state
 
-      status.as[String] must_== SpeedMap.v_status_downloaded
+      status.as[String] must_== SpeedMap.v_state_downloaded
 
     }
 
