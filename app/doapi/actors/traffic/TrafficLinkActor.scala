@@ -97,17 +97,17 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
     case req: HK1980GRIDtoWGS84Resp =>
       req.reqMeta.map { m =>
         val linkId = m("linkId").toString
+        val mode = m("mode").toString
         log.info(s"checking the linkID: $linkId from resp: $req")
         trafficLinkDao.findFirst(Json.obj("linkId" -> linkId)) map {
           case Some(linkNode) =>
-            val upd = Json.obj("lat" -> req.lat, "lng" -> req.long, ModelCommon.state.name -> ModelCommon.state.v_ready)
+            val upd = Json.obj(mode + "Lat" -> req.lat, mode + "Lng" -> req.long, ModelCommon.state.name -> ModelCommon.state.v_ready)
             log.info(s"found some linkNode with linkId: $linkId with dataToUpdate: $upd")
             trafficLinkDao.updatePartial(linkNode._2, upd) map { le =>
               log.info("updated linkId with latLong : " + req.lat + "," + req.long)
             }
           case None =>
             log.info(s"There is no such linkId exist in db: $linkId")
-
         }
       }
 
@@ -137,7 +137,7 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
 
             Await.result(trafficLinkDao.findFirst(Json.obj("linkId" -> linkID, ModelCommon.state.name -> ModelCommon.state.v_ready)) map { nodeOpt =>
               log.debug("after query with isDefined: " + nodeOpt.isDefined)
-              
+
               if (!nodeOpt.isDefined) {
 
                 val startNode = row.getCell(1).toString()
@@ -165,7 +165,8 @@ class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: 
                 val js = Json.toJson(linkNode)(linkNodeWriter).as[JsObject]
                 log.debug(js.toString)
                 trafficLinkDao.insert(js) map { le =>
-                  convertActor.ref.tell(HK1980GRIDtoWGS84Request(startNorthings, startEastings, Some(Map("linkId" -> linkID))), requestor)
+                  convertActor.ref.tell(HK1980GRIDtoWGS84Request(startNorthings, startEastings, Some(Map("linkId" -> linkID, "mode" -> "start"))), requestor)
+                  convertActor.ref.tell(HK1980GRIDtoWGS84Request(endNorthings, endEastings, Some(Map("linkId" -> linkID, "mode" -> "end"))), requestor)
                   originator ! "ok"
                 }
 

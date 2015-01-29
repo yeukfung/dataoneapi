@@ -25,7 +25,8 @@ libraryDependencies ++= Seq(
   "org.specs2"        %% "specs2"            % "2.3.12"         % "test"  ,
   "com.typesafe.akka" %% "akka-testkit" % "2.3.7" % "test",
   "com.google.inject" % "guice" % "4.0-beta5",
-  "ws.securesocial" %% "securesocial" % "3.0-M1"
+  "ws.securesocial" %% "securesocial" % "3.0-M1",
+  "play-autosource" %% "reactivemongo" % "2.1-SNAPSHOT"
 )
 
 libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23"
@@ -33,5 +34,3 @@ libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.
 libraryDependencies += "org.apache.poi" % "poi" % "3.9"
 
 libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.39.0"
-
-libraryDependencies += "io.spray" %%  "spray-json" % "1.3.1"

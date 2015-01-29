@@ -52,4 +52,13 @@ object TrafficModels {
   object Formats {
     implicit val traiffSpeedDataFormat = Json.format[TrafficSpeedData]
   }
+
+  object TrafficMeta {
+
+    val f_startLat = "startLat"
+
+    def create(linkJs: JsObject, current: TrafficSpeedData): JsObject = {
+      Json.obj()
+    }
+  }
 }

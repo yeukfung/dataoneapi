@@ -10,6 +10,7 @@ class JobsActor @Inject() (trafficActor: ActorInstance[TrafficActor]) extends Ac
   def ops = {
     case "run10m" =>
       trafficActor.ref ! TrafficActor.SyncLinkData
+      trafficActor.ref ! TrafficActor.ProcessDownloadedSpeedData(5)
     case "run1m" =>
       trafficActor.ref ! TrafficActor.DownloadSpeedData
     case "run" =>
