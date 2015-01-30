@@ -9,19 +9,26 @@ import play.api.Application
 import amlibs.core.playspecific.PlayMixin
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Calendar
+import java.util.TimeZone
+import amlibs.core.javautil.DateUtils
 
 trait ESMixin extends PlayMixin {
 
   val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
+
   def toESTimeStamp(date: Date): String = {
-    timestampFormat.format(date)
+    //timestampFormat.setTimeZone(TimeZone.getTimeZone("Asia/Hong_Kong"))
+    val utcDate = DateUtils.getDateInTimeZone(date, "UTC")
+    timestampFormat.format(utcDate)
   }
 
   val esUrl = conf.getString("es.url").getOrElse("http://localhost:9200")
   val esClient = new ESClient(esUrl)
 
 }
+
 
 class ESClient(esURL: String) extends PlayMixin {
 

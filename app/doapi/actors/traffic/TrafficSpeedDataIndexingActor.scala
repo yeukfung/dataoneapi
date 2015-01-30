@@ -22,6 +22,8 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import amlibs.core.utils.ESMixin
 import doapi.daos.TrafficSpeedDataCodeDao
+import amlibs.core.utils.JsFlattener
+import play.api.libs.json._
 
 class TrafficSpeedDataIndexingActor @Inject() (daoSpeedData: TrafficSpeedDataDao,
                                                daoLink: TrafficLinkDao,
@@ -34,6 +36,7 @@ class TrafficSpeedDataIndexingActor @Inject() (daoSpeedData: TrafficSpeedDataDao
 
   esClient.createIndex(IDX)
 
+  val removeId = (__ \ "_id").json.prune
   implicit val dur = Duration(5, "seconds")
   import JsonQueryHelper._
   import ModelCommon._
@@ -76,22 +79,27 @@ class TrafficSpeedDataIndexingActor @Inject() (daoSpeedData: TrafficSpeedDataDao
               l.debug(s"Inside the for loop of fetching link information optLink.isDefined = ${optLink.isDefined} & optLinkMeta.isDefined = ${optLinkMeta.isDefined} & linkName: $linkName")
               l.debug(s"optLink: ${optLink.get} ")
 
-              val meta = qEq("meta", Json.obj(
+              val metaObj = qEq("meta", Json.obj(
                 "startLongLat" -> Json.arr((linkInfo \ "startLng"), (linkInfo \ "startLat")),
                 "endLongLat" -> Json.arr((linkInfo \ "endLng"), (linkInfo \ "endLat")),
                 "regionName" -> regionName,
                 "linkName" -> linkName))
 
-              val newState = state.create(state.v_indexed) ++ qEq("es", Json.obj("ver" -> ver))
+              val esObj = qEq("es", Json.obj("ver" -> ver))
 
-              val finalJs = js ++ meta ++ newState ++ timestamp
-              l.debug(s"id: $id and finalJs: $finalJs")
+              val newState = state.create(state.v_indexed) ++ esObj
+
+              //log.debug(s"metaObj: $metaObj")
+
+              val finalJs = js ++ metaObj ++ newState ++ timestamp
 
               daoSpeedData.updatePartial(id, finalJs)
 
-              val dataJs = finalJs ++ qEq("id", id)
+              val dataJs = (finalJs ++ qEq("id", id)).transform(removeId).get.as[JsObject]
 
+              l.debug(s"id: $id and finalJs: $finalJs")
               esClient.index("traffic", "speeddata", id, dataJs) map { _ =>
+                l.debug(s"dataJs sent to ElasticSearch: $dataJs")
               }
 
             }
