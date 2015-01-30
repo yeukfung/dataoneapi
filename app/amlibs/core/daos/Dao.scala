@@ -104,10 +104,13 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
       Json.obj("$set" -> t)).map { _ => () }
   }
 
+  val removeIds = (__ \ "_id").json.prune
+
   override def updatePartial(id: String, upd: JsObject)(implicit ctx: ExecutionContext): Future[Unit] = {
+    val upd1 = upd.transform(removeIds).get
     coll.update(
       Json.obj("_id" -> BSONObjectID(id)),
-      Json.obj("$set" -> upd)).map { _ => () }
+      Json.obj("$set" -> upd1)).map { _ => () }
   }
 
   override def batchInsert(elems: Enumerator[JsObject])(implicit ctx: ExecutionContext): Future[LastError] = {

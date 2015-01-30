@@ -7,6 +7,21 @@ import play.api.libs.json.JsObject
 import play.api.libs.json.Json
 import play.api.Application
 import amlibs.core.playspecific.PlayMixin
+import java.text.SimpleDateFormat
+import java.util.Date
+
+trait ESMixin extends PlayMixin {
+
+  val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
+  def toESTimeStamp(date: Date): String = {
+    timestampFormat.format(date)
+  }
+
+  val esUrl = conf.getString("es.url").getOrElse("http://localhost:9200")
+  val esClient = new ESClient(esUrl)
+
+}
 
 class ESClient(esURL: String) extends PlayMixin {
 

@@ -19,12 +19,13 @@ import akka.actor.PoisonPill
 import JsonQueryHelper._
 import java.text.SimpleDateFormat
 import doapi.models.ModelCommon._
+import doapi.actors.common.Indexing
+import akkaguice.ActorInstance
+import scala.concurrent.duration.Duration
 
-class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, trafficSpeedDataDao: TrafficSpeedDataDao) extends ActorStack with PlayMixin {
-
-  val esUrl = conf.getString("es.url").getOrElse("http://localhost:9200")
-  val esClient = new ESClient(esUrl)
-  esClient.createIndex("traffic")
+class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
+                                             trafficSpeedDataDao: TrafficSpeedDataDao,
+                                             trafficActor: ActorInstance[TrafficActor]) extends ActorStack with PlayMixin {
 
   def ops = {
 
@@ -35,16 +36,20 @@ class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, t
 
         resultList.map {
           item =>
-            val worker = context.actorOf(Props(new TrafficSpeedProcessingWorker(trafficSpeedDao, trafficSpeedDataDao, esClient)))
+            val worker = context.actorOf(Props(new TrafficSpeedProcessingWorker(trafficSpeedDao, trafficSpeedDataDao)))
             worker.tell(item, requestor)
         }
+
+        // perform indexing after 3 seconds of process
+        if (resultList.size > 0)
+          context.system.scheduler.scheduleOnce(Duration(3, "seconds"), trafficActor.ref, Indexing.PerformIndexing())
       }
 
   }
 
 }
 
-class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao, esClient: ESClient) extends ActorStack {
+class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao) extends ActorStack {
 
   import scala.xml._
   import doapi.models.traffic.TrafficModels.Formats._
@@ -89,13 +94,7 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
 
             val data = TrafficSpeedData(linkId, region, roadType, roadSaturationLevel, trafficSpeed, captureDate)
             val newJs = Json.toJson(data).as[JsObject]
-            speedDataDao.insert(newJs) map { dataId =>
-
-              val dataJs = newJs ++ qEq("id", dataId)
-              // submit data to elastic search
-              esClient.index("traffic", "speeddata", dataId, dataJs)
-
-            }
+            speedDataDao.insert(newJs)
             allResult = allResult.append(newJs)
           }
 

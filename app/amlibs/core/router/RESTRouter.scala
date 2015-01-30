@@ -43,8 +43,6 @@ trait RESTController[Id] extends Controller {
     }
 }
 
-
-
 abstract class RESTRouterContoller[Id](implicit idBindable: PathBindable[Id])
   extends Router.Routes {
 
