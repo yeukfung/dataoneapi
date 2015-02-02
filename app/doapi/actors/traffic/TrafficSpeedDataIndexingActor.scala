@@ -70,7 +70,7 @@ class TrafficSpeedDataIndexingActor @Inject() (daoSpeedData: TrafficSpeedDataDao
               optRegionName <- daoCode.findFirstCodeValue("region", regionCode)
             } yield {
 
-              val timestamp = qEq("@timestamp", toESTimeStamp(data.captureDate))
+              val timestamp = qEq("@timestamp", toESTimeStamp(data.parseCaptureDate))
 
               val linkName = if (optLinkMeta.isDefined) (optLinkMeta.get._1 \ "name").as[String] else data.linkId
               val linkInfo = optLink.get._1

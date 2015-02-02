@@ -6,8 +6,6 @@ import play.api.libs.json.JsValue
 import play.api.libs.json.JsString
 import play.api.libs.json.JsNumber
 
-
-
 object JsonQueryHelper {
 
   /** Json Parser **/
@@ -19,12 +17,12 @@ object JsonQueryHelper {
   /** smart wrap to detect if double quote is required base on the content type **/
   private def smartWrap[T](fv: T) = fv match {
     case v: String => s""""$v""""
-    case _ => fv
+    case _         => fv
   }
   private def smartWrapJs[T](fv: T): JsValue = fv match {
     case v: String => JsString(v)
-    case i: Int => JsNumber(i)
-    case i: Long => JsNumber(i)
+    case i: Int    => JsNumber(i)
+    case i: Long   => JsNumber(i)
     case other @ _ => JsString(other.toString)
   }
 
@@ -57,6 +55,10 @@ object JsonQueryHelper {
   /** and **/
   def qAnd[T](objs: JsObject*): JsObject = {
     qEq("$and", objs.foldLeft(Json.arr())((acc, item) => acc :+ item.as[JsValue]))
+  }
+
+  def query(js: JsObject = Json.obj()): JsObject = {
+    qEq("$query", js)
   }
 
   /** orders **/

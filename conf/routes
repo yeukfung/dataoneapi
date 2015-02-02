@@ -3,12 +3,15 @@
 # ~~~~
 
 # Home page
-->      /persons                    controllers.PersonsAPI
 
-->		/api/trafficspeeds			controllers.TrafficSpeedAPI
+GET   /api/traffic/speedmap/latest   controllers.TrafficSpeedAPI.latest
 
-GET     /                           controllers.Application.index
+#->      /persons                    controllers.PersonsAPI
+
+#->		/api/trafficspeeds			controllers.TrafficSpeedAPI
+
+GET   /                              controllers.Application.index
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET   /assets/*file                  controllers.Assets.at(path="/public", file)

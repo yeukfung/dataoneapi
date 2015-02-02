@@ -7,6 +7,9 @@ import scala.concurrent.ExecutionContext.Implicits._
 import play.api.libs.json.JsObject
 import amlibs.core.daos.JsonQueryHelper
 import JsonQueryHelper._
+import play.api.libs.json.Json
+import reactivemongo.api.indexes.Index
+import reactivemongo.api.indexes.IndexType
 
 class TrafficSpeedDao extends JsObjectDao {
   val dbName = "trafficspeeds"
@@ -18,6 +21,8 @@ class TrafficSpeedHeaderDao extends JsObjectDao {
 
 class TrafficSpeedDataDao extends JsObjectDao {
   val dbName = "trafficspeeddata"
+
+  coll.indexesManager.ensure(Index(key = Seq(("captureDate", IndexType.Descending))))
 }
 
 class TrafficLinkDao extends JsObjectDao {
@@ -26,6 +31,7 @@ class TrafficLinkDao extends JsObjectDao {
   def findFirstByLinkId(linkId: String) = {
     this.findFirst(qEq("linkId", linkId))
   }
+
 }
 
 class TrafficLinkMetaDao extends TrafficLinkDao {

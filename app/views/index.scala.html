@@ -1,7 +1,51 @@
 @(message: String)
 
-@main("Welcome to Play") {
+@main("BETTER GOVHK API") {
 
-    @play20.welcome(message)
+<div>&nbsp;</div>
+<div class="jumbotron">
+  <h1>Better GOVHK API</h1>
+  <p>This site aims to create a better way to view the existing traffic data provided by HK Government</p>
+</div>
+    <p>
+    
+    With some analysis on the current traffic data in GOV DataOne API, it's found that some information is missing, especially the GEO coordination data in the traffic links,
+    I have managed to create this API for all of us to get more data.
+    
+    </p>
+    <hr/>
+    
+    <h4>Data from HK GOV</h4>
+    <p>
+    you will get the latest traffic xml data from hk gov at: 
+    <a target="_blank" href="http://resource.data.one.gov.hk/td/speedmap.xml">http://resource.data.one.gov.hk/td/speedmap.xml</a>
+    <blockquote>
+    <img src="@routes.Assets.at("images/xml.png")"/>
+    </blockquote>
+    </p>
+    
+    <h4>Data from BETTER GOVHK API</h4>
+    <p>
+    you will get from following api:
+    <a target="_blank" href="http://govapi.amoebaconsulting.net/api/traffic/speedmap/latest">http://govapi.amoebaconsulting.net/api/traffic/speedmap/latest</a>
+    <blockquote>
+    <img src="@routes.Assets.at("images/js.png")"/>
+    </blockquote>
+    
+    
+    </p>
+    
+    <h4>About this project</h4>
+    <p>
+    I have made this project open source on github, anyone is welcome to join and make this API even better
+    
+    <a target="_blank" href="https://github.com/yeukfung/dataoneapi">https://github.com/yeukfung/dataoneapi</a>
+    
+    </p>
+    
+    <hr/>
+    <p>
+    feel free to contact me at: <a herf="mailto:yeukfung@@gmail.com">yeukfung@@gmail.com</a>
+    </p>
 
 }

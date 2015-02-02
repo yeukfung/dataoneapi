@@ -67,6 +67,7 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
 
         try {
 
+          val md5 = (item \ "md5").as[String]
           val xml = scala.xml.XML.loadString(srcString)
           log.debug(s"xml is successfully loaded for id: $id")
           /**
@@ -90,10 +91,11 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
             val roadType = (n \ "ROAD_TYPE").text
             val roadSaturationLevel = (n \ "ROAD_SATURATION_LEVEL").text
             val trafficSpeed = (n \ "TRAFFIC_SPEED").text.toInt
-            val captureDate = dateFormat.parse((n \ "CAPTURE_DATE").text)
+            val captureDate = (n \ "CAPTURE_DATE").text
+            val parsedCaptureDate = dateFormat.parse(captureDate)
 
-            val data = TrafficSpeedData(linkId, region, roadType, roadSaturationLevel, trafficSpeed, captureDate)
-            val newJs = Json.toJson(data).as[JsObject]
+            val data = TrafficSpeedData(linkId, region, roadType, roadSaturationLevel, trafficSpeed, captureDate, parsedCaptureDate)
+            val newJs = Json.toJson(data).as[JsObject] ++ qEq("md5", md5)
             speedDataDao.insert(newJs)
             allResult = allResult.append(newJs)
           }

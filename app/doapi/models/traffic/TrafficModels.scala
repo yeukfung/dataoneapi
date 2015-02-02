@@ -47,7 +47,8 @@ object TrafficModels {
     roadType: String,
     roadSaturationLevel: String,
     trafficSpeed: Int,
-    captureDate: Date)
+    captureDate: String,
+    parseCaptureDate: Date)
 
   object Formats {
     implicit val traiffSpeedDataFormat = Json.format[TrafficSpeedData]

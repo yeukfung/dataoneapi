@@ -15,6 +15,7 @@ import amlibs.core.daos.vendors.reactivemongo.ReactiveMongoREST
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
 import amlibs.core.playspecific.PlayMixin
+import play.api.Logger
 
 trait ReactiveMongoDao[T] extends RESTAPI[T, String, JsObject, JsObject, LastError]
 
@@ -26,6 +27,7 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
   //abstract members
   def dbName: String
 
+  val log = Logger
   /** abstract members **/
   implicit lazy val app = Play.current
 
@@ -127,6 +129,7 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
   }
 
   override def find(sel: JsObject, limit: Int = 0, skip: Int = 0)(implicit ctx: ExecutionContext): Future[List[(JsObject, String)]] = {
+    log.debug(s"find query: $sel")
     val cursor = coll.find(sel).options(QueryOpts().skip(skip)).cursor[JsObject]
     val l = if (limit != 0) cursor.collect[List](limit) else cursor.collect[List]()
     l.map(_.map(js => (js, ((js \ "_id").as[BSONObjectID]).stringify)))
