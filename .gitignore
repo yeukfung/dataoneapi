@@ -22,5 +22,5 @@ bin
 /data/samples
 /test/samples
 temp
-*.png
+!*.png
 !public/*
