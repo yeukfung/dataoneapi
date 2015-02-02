@@ -27,6 +27,7 @@ class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
                                              trafficSpeedDataDao: TrafficSpeedDataDao,
                                              trafficActor: ActorInstance[TrafficActor]) extends ActorStack with PlayMixin {
 
+  val indexingEnabled = conf.getBoolean("indexing.enabled").getOrElse(false)
   def ops = {
 
     case req: TrafficActor.ProcessDownloadedSpeedData =>
@@ -41,7 +42,7 @@ class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
         }
 
         // perform indexing after 3 seconds of process
-        if (resultList.size > 0)
+        if (indexingEnabled && resultList.size > 0)
           context.system.scheduler.scheduleOnce(Duration(3, "seconds"), trafficActor.ref, Indexing.PerformIndexing())
       }
 
