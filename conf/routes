@@ -10,6 +10,7 @@ GET   /api/traffic/speedmap/latest   controllers.TrafficSpeedAPI.latest
 
 #->		/api/trafficspeeds			controllers.TrafficSpeedAPI
 
+GET   /system/patch/created          @controllers.PatchController.patchCreatedDate
 GET   /                              controllers.Application.index
 
 

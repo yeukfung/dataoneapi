@@ -14,7 +14,7 @@ class JobsActor @Inject() (trafficActor: ActorInstance[TrafficActor]) extends Ac
     case "run1m" =>
       trafficActor.ref ! TrafficActor.DownloadSpeedData
       trafficActor.ref ! TrafficActor.ProcessDownloadedSpeedData(5)
-    case "run" =>
-
+    case "runOnce" =>
+      trafficActor.ref ! "housekeep"
   }
 }

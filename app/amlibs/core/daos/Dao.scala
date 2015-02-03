@@ -16,6 +16,9 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
 import amlibs.core.playspecific.PlayMixin
 import play.api.Logger
+import play.api.cache.Cache
+import scala.concurrent.duration.Duration
+import scala.reflect.ClassTag
 
 trait ReactiveMongoDao[T] extends RESTAPI[T, String, JsObject, JsObject, LastError]
 
@@ -82,7 +85,7 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
     val id = BSONObjectID.generate
     obj \ "id" match {
       case _: JsUndefined =>
-        coll.insert(obj ++ Json.obj("_id" -> id))
+        coll.insert(obj ++ Json.obj("_id" -> id, "created" -> System.currentTimeMillis()))
           .map { _ => id.stringify }
       case js: JsValue =>
         update(js.as[String], obj) map {
@@ -154,4 +157,26 @@ trait JsObjectDao extends ReactiveMongoDao[JsObject] {
     this.updatePartial(id, upd)
   }
 
+  def cfind(expiration: Duration)(sel: JsObject, limit: Int = 0, skip: Int = 0)(implicit ctx: ExecutionContext): Future[List[(JsObject, String)]] = {
+    log.debug(s"cached find query: $sel")
+    cacheResult(sel.toString(), expiration) {
+      this.find(sel, limit, skip)
+    }
+  }
+
+  def cacheResult[R](key: String, expiration: Duration)(f: => R)(implicit ctx: ExecutionContext, classTag: ClassTag[R]): R = {
+    Cache.getOrElse(key) {
+      val result = f
+      Cache.set(key, result, expiration)
+      result
+    }
+  }
+  /**
+   *     Cache.getOrElse("", expiration) {
+   * val result = f
+   * Cache.set(key, f)
+   * result
+   * }
+   *
+   */
 }

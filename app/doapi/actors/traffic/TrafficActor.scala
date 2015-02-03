@@ -16,7 +16,8 @@ object TrafficActor {
 class TrafficActor @Inject() (speedActor: ActorInstance[TrafficSpeedActor],
                               syncLDActor: ActorInstance[TrafficLinkActor],
                               processingActor: ActorInstance[TrafficSpeedProcessingActor],
-                              indexingActor: ActorInstance[TrafficSpeedDataIndexingActor]) extends ActorStack {
+                              indexingActor: ActorInstance[TrafficSpeedDataIndexingActor],
+                              trafficHouseKeep: ActorInstance[TrafficHouseKeepingActor]) extends ActorStack {
 
   import TrafficActor._
 
@@ -32,6 +33,9 @@ class TrafficActor @Inject() (speedActor: ActorInstance[TrafficSpeedActor],
 
     case msg @ SyncLinkData =>
       syncLDActor.ref forward msg
+      
+    case "housekeep" =>
+      trafficHouseKeep.ref ! "housekeep"
 
   }
 }

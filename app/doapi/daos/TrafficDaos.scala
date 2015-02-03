@@ -13,6 +13,8 @@ import reactivemongo.api.indexes.IndexType
 
 class TrafficSpeedDao extends JsObjectDao {
   val dbName = "trafficspeeds"
+
+  coll.indexesManager.ensure(Index(key = Seq(("created", IndexType.Ascending))))
 }
 
 class TrafficSpeedHeaderDao extends JsObjectDao {

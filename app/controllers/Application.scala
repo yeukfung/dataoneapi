@@ -22,6 +22,7 @@ import doapi.daos.TrafficLinkDao
 import amlibs.core.daos.JsonQueryHelper
 import play.api.libs.json.JsArray
 import java.util.Date
+import scala.concurrent.duration.Duration
 
 object Application extends Controller {
 
@@ -80,7 +81,7 @@ class TrafficSpeedDataController @Inject() (linkDao: TrafficLinkDao, daoSpeedDat
     Logger.info(s"query: $q")
     for {
       list <- daoSpeedData.find(query(q) ++ JsonQueryHelper.orderBy(orderByDate), 617, 0)
-      allLinkIds <- linkDao.find(Json.obj())
+      allLinkIds <- linkDao.cfind(Duration(1, "hour"))(Json.obj())
     } yield {
       if (list.size > 0) {
 

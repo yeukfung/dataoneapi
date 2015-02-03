@@ -32,6 +32,7 @@ object Global extends GlobalSettings {
     val af = globals.injector.getInstance(classOf[GuiceActorFactory])
     Akka.system(app).scheduler.schedule(2 seconds, 10 minutes, af.jobsActor.ref, "run10m")
     Akka.system(app).scheduler.schedule(10 seconds, 1 minutes, af.jobsActor.ref, "run1m")
+    af.jobsActor.ref ! "runOnce"
   }
 
   override def onStop(app: Application) {
