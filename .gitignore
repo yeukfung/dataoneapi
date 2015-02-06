@@ -24,3 +24,4 @@ bin
 temp
 !*.png
 !public/*
+scripts/downloads
