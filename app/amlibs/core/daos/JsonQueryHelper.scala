@@ -69,4 +69,15 @@ object JsonQueryHelper {
     val finalQ = orderTags.foldLeft(Json.obj())((acc, item) => acc ++ item)
     qEq("$orderby", finalQ)
   }
+
+  /** json transforms **/
+
+  import play.api.libs.json._
+  import play.api.libs.json.Reads._
+  import play.api.libs.functional.syntax._
+
+  def tConcat(a: String, b: String) = ((__ \ a).json.pick and (__ \ b).json.pick) reduce
+
+  def tPrune(fld: String) = (__ \ fld).json.prune
+
 }

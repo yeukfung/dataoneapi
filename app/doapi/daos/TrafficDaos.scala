@@ -30,6 +30,8 @@ class TrafficSpeedDataDao extends JsObjectDao {
 class TrafficLinkDao extends JsObjectDao {
   val dbName = "trafficlinks"
 
+  coll.indexesManager.ensure(Index(key = Seq(("linkId", IndexType.Ascending))))
+  
   def findFirstByLinkId(linkId: String) = {
     this.findFirst(qEq("linkId", linkId))
   }

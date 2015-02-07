@@ -107,3 +107,31 @@ object TrafficSpeedAPI extends RESTReactiveMongoRouterContoller {
 
   def latest = controller.latest
 }
+
+class TrafficLinkIdController @Inject() (linkDao: TrafficLinkDao) extends RESTReactiveMongoController[JsObject]() {
+
+  import JsonQueryHelper._
+  import play.api.libs.json._
+  import play.api.libs.json.Reads._
+  import play.api.libs.functional.syntax._
+
+  val coll = db.collection[JSONCollection](linkDao.dbName)
+  val outputTransform = (tPrune("_id") and
+    (__ \ "geoJsonStart").json.copyFrom(tConcat("startLng", "startLat")) and
+    (__ \ "geoJsonEnd").json.copyFrom(tConcat("endLng", "endLat"))) reduce
+
+  def findByLinkId(linkId: String) = Action.async {
+    linkDao.findFirstByLinkId(linkId).map {
+      case Some(x) => Ok(x._1.transform(outputTransform).getOrElse(Json.obj()))
+      case None    => NotFound
+    }
+  }
+
+}
+
+object TrafficLinkNodeAPI extends RESTReactiveMongoRouterContoller {
+  val controller = current.global.getControllerInstance(classOf[TrafficLinkIdController])
+  def resController = controller
+
+  def findByLinkId(linkId: String) = controller.findByLinkId(linkId)
+}

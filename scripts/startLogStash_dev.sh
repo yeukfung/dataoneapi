@@ -1,0 +1,1 @@
+~/dev/elasticsearch/logstash-1.4.2/bin/logstash -p ~/git/dataonehk/scripts/ -f ~/git/dataonehk/scripts/logstash/cnf-traffic.conf
