@@ -24,4 +24,5 @@ bin
 temp
 !*.png
 !public/*
+!scripts/downloads/*.sh
 scripts/downloads
