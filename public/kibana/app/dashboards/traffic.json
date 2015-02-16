@@ -1,0 +1,477 @@
+{
+  "title": "全港路段分析(1小時內)",
+  "services": {
+    "query": {
+      "list": {
+        "0": {
+          "id": 0,
+          "type": "topN",
+          "query": "roadSaturationLevel.raw : (\"TRAFFIC BAD\")",
+          "alias": "慢車",
+          "color": "#7EB26D",
+          "pin": true,
+          "enable": true,
+          "field": "region.raw",
+          "size": 5,
+          "union": "AND"
+        },
+        "1": {
+          "id": 1,
+          "type": "topN",
+          "query": "*",
+          "alias": "各區平均",
+          "color": "#705DA0",
+          "pin": true,
+          "enable": true,
+          "field": "region.raw",
+          "size": 5,
+          "union": "AND"
+        }
+      },
+      "ids": [
+        0,
+        1
+      ]
+    },
+    "filter": {
+      "list": {
+        "0": {
+          "type": "time",
+          "field": "@timestamp",
+          "from": "now-1h",
+          "to": "now",
+          "mandate": "must",
+          "active": true,
+          "alias": "",
+          "id": 0
+        },
+        "1": {
+          "type": "querystring",
+          "query": "_type: \"speedmap_v3\"",
+          "mandate": "must",
+          "active": true,
+          "alias": "",
+          "id": 1
+        }
+      },
+      "ids": [
+        0,
+        1
+      ]
+    }
+  },
+  "rows": [
+    {
+      "title": "概覧",
+      "height": "220px",
+      "editable": false,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 4,
+          "editable": false,
+          "type": "terms",
+          "loadingEditor": false,
+          "field": "meta.region",
+          "exclude": [],
+          "missing": false,
+          "other": false,
+          "size": 10,
+          "order": "count",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": true,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "pie",
+          "counter_pos": "below",
+          "spyable": false,
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0,
+              1
+            ]
+          },
+          "tmode": "terms",
+          "tstat": "count",
+          "valuefield": "",
+          "title": "地區分佈"
+        },
+        {
+          "error": false,
+          "span": 4,
+          "editable": false,
+          "type": "terms",
+          "loadingEditor": false,
+          "field": "roadSaturationLevel.raw",
+          "exclude": [],
+          "missing": false,
+          "other": false,
+          "size": 10,
+          "order": "count",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "pie",
+          "counter_pos": "below",
+          "spyable": false,
+          "queries": {
+            "mode": "selected",
+            "ids": []
+          },
+          "tmode": "terms",
+          "tstat": "mean",
+          "valuefield": "",
+          "title": "車速狀況"
+        },
+        {
+          "error": false,
+          "span": 4,
+          "editable": false,
+          "type": "terms",
+          "loadingEditor": false,
+          "field": "roadType.raw",
+          "exclude": [],
+          "missing": false,
+          "other": false,
+          "size": 10,
+          "order": "count",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "pie",
+          "counter_pos": "below",
+          "spyable": false,
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0,
+              1
+            ]
+          },
+          "tmode": "terms",
+          "tstat": "total",
+          "valuefield": "",
+          "title": "路段類別"
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "車速概覧",
+      "height": "280px",
+      "editable": false,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 6,
+          "editable": false,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "mean",
+          "time_field": "@timestamp",
+          "value_field": "trafficSpeed",
+          "x-axis": true,
+          "y-axis": true,
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "queries": {
+            "mode": "selected",
+            "ids": [
+              1
+            ]
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "auto_int": true,
+          "resolution": 5000,
+          "interval": "1s",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "lines": true,
+          "fill": 0,
+          "linewidth": 3,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "spyable": false,
+          "zoomlinks": true,
+          "options": true,
+          "legend": true,
+          "show_query": true,
+          "interactive": true,
+          "legend_counts": true,
+          "timezone": "browser",
+          "percentage": false,
+          "zerofill": false,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          },
+          "title": "各區平均車速"
+        },
+        {
+          "span": 6,
+          "editable": false,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "count",
+          "time_field": "@timestamp",
+          "value_field": null,
+          "x-axis": true,
+          "y-axis": true,
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "queries": {
+            "mode": "selected",
+            "ids": [
+              0
+            ]
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "auto_int": true,
+          "resolution": 100,
+          "interval": "30s",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "lines": true,
+          "fill": 0,
+          "linewidth": 3,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "spyable": false,
+          "zoomlinks": true,
+          "options": true,
+          "legend": true,
+          "show_query": true,
+          "interactive": true,
+          "legend_counts": true,
+          "timezone": "browser",
+          "percentage": false,
+          "zerofill": false,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "individual",
+            "query_as_alias": true
+          },
+          "title": "各區狀況"
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "慢車位置分析",
+      "height": "750px",
+      "editable": false,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 4,
+          "editable": false,
+          "type": "terms",
+          "loadingEditor": false,
+          "field": "meta.linkId.raw",
+          "exclude": [],
+          "missing": false,
+          "other": false,
+          "size": 25,
+          "order": "reverse_mean",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "table",
+          "counter_pos": "above",
+          "spyable": false,
+          "queries": {
+            "mode": "selected",
+            "ids": []
+          },
+          "tmode": "terms_stats",
+          "tstat": "mean",
+          "valuefield": "trafficSpeed",
+          "title": "最慢車速的25個位置"
+        },
+        {
+          "error": false,
+          "span": 8,
+          "editable": false,
+          "type": "bettermap",
+          "loadingEditor": false,
+          "field": "meta.geoJsonStart",
+          "size": 1000,
+          "spyable": false,
+          "tooltip": "mapTooltips.raw",
+          "queries": {
+            "mode": "selected",
+            "ids": []
+          },
+          "title": "地點"
+        }
+      ],
+      "notice": false
+    }
+  ],
+  "editable": false,
+  "failover": false,
+  "index": {
+    "interval": "day",
+    "pattern": "[logstash-]YYYY.MM.DD",
+    "default": "_all",
+    "warm_fields": true
+  },
+  "style": "dark",
+  "panel_hints": true,
+  "pulldowns": [
+    {
+      "type": "query",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "query": "*",
+      "pinned": true,
+      "history": [
+        "*",
+        "roadSaturationLevel.raw : (\"TRAFFIC BAD\")",
+        "roadSaturationLevel.raw : (\"TRAFFIC AVERAGE\")",
+        "region : \"HK\"",
+        "region : \"TM\"",
+        "xml.REGION : \"HK\"",
+        "xml.REGION : \"TM\"",
+        "xml.REGION : \"K\" ",
+        "xml.REGION : \"ST\"",
+        "xml.REGION : \"K\" AND _type: \"speedmap_v2\" AND xml.TRAFFIC_SPEED : [ * TO 30 ]"
+      ],
+      "remember": 10
+    },
+    {
+      "type": "filtering",
+      "collapse": false,
+      "notice": true,
+      "enable": true
+    }
+  ],
+  "nav": [
+    {
+      "type": "timepicker",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "status": "Stable",
+      "time_options": [
+        "5m",
+        "10m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "timefield": "@timestamp",
+      "now": true,
+      "filter_id": 0
+    }
+  ],
+  "loader": {
+    "save_gist": false,
+    "save_elasticsearch": false,
+    "save_local": false,
+    "save_default": false,
+    "save_temp": true,
+    "save_temp_ttl_enable": true,
+    "save_temp_ttl": "30d",
+    "load_gist": false,
+    "load_elasticsearch": false,
+    "load_elasticsearch_size": 20,
+    "load_local": false,
+    "hide": true
+  },
+  "refresh": "1m"
+}

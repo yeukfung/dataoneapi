@@ -22,6 +22,7 @@ import doapi.models.ModelCommon._
 import doapi.actors.common.Indexing
 import akkaguice.ActorInstance
 import scala.concurrent.duration.Duration
+import doapi.actors.common.JsDataLogging
 
 class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
                                              trafficSpeedDataDao: TrafficSpeedDataDao,
@@ -50,7 +51,7 @@ class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
 
 }
 
-class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao) extends ActorStack {
+class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao) extends ActorStack with JsDataLogging {
 
   import scala.xml._
   import doapi.models.traffic.TrafficModels.Formats._
@@ -62,7 +63,7 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
       val requestor = sender
       val myself = self
 
-      log.debug(s"processing traffic speed data record in id: $id")
+      log.info(s"processing traffic speed data record in id: $id")
 
       (item \ SpeedMap.f_src).asOpt[String] map { srcString =>
 
@@ -96,8 +97,13 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
             val parsedCaptureDate = dateFormat.parse(captureDate)
 
             val data = TrafficSpeedData(linkId, region, roadType, roadSaturationLevel, trafficSpeed, captureDate, parsedCaptureDate)
+
+            val logJs = Json.toJson(data).as[JsObject]
+
             val newJs = Json.toJson(data).as[JsObject] ++ qEq("md5", md5)
-            speedDataDao.insert(newJs)
+            speedDataDao.insert(newJs) map { id =>
+              jlSpeedmap(logJs ++ qEq("id", id))
+            }
             allResult = allResult.append(newJs)
           }
 
@@ -109,18 +115,17 @@ class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSp
 
           log.debug(s"finished processing traffic speed data record in id: $id")
           requestor ! "ok"
-          myself ! PoisonPill
         } catch {
           case e: Exception =>
             val formatedErr = s"exception durring processing item: ${e.getMessage} with srcString: $srcString"
             log.error(formatedErr)
             dao.markState(id, state.create(state.v_failed) ++ error.create(formatedErr, Some("TrafficSpeedProcessingWorker")))
             requestor ! "err"
-            myself ! PoisonPill
         }
       } getOrElse {
-        myself ! PoisonPill
       }
+
+      context.system.scheduler.scheduleOnce(Duration(10, "seconds"), myself, PoisonPill)
 
   }
 }

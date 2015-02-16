@@ -20,13 +20,10 @@ libraryDependencies ++= Seq(
   anorm,
   cache,
   ws,
-  "com.mandubian"     %% "play-json-zipper"  % "1.2"                      ,
-  "com.typesafe.play" %% "play-json"         % "2.3.7"                     ,
   "org.specs2"        %% "specs2"            % "2.3.12"         % "test"  ,
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.7" % "test",
   "com.google.inject" % "guice" % "4.0-beta5",
   "ws.securesocial" %% "securesocial" % "3.0-M1",
-  "play-autosource" %% "reactivemongo" % "2.1-SNAPSHOT"
+  "net.amoeba" %% "play2-amlibs" % "1.0-SNAPSHOT"
 )
 
 libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23"

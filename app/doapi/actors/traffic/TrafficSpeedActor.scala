@@ -11,8 +11,10 @@ import amlibs.core.daos.JsonQueryHelper
 import doapi.models.traffic.TrafficModels.SpeedMap
 import play.api.libs.json.Json
 import amlibs.core.playspecific.PlayMixin
+import akkaguice.ActorInstance
+import scala.concurrent.duration.Duration
 
-class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao) extends ActorStack with PlayMixin {
+class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao, trafficActor: ActorInstance[TrafficActor]) extends ActorStack with PlayMixin {
 
   import JsonQueryHelper._
 
@@ -22,6 +24,7 @@ class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao) extends ActorSt
       
     case TrafficActor.DownloadSpeedData =>
 
+      
       val requestor = sender
       for {
         wsResp <- WS.url(SPEEDXML_URL).get()
@@ -38,6 +41,9 @@ class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao) extends ActorSt
                 speedmapDao.insert(js).map { id =>
                   val updatedJs = js ++ Json.obj("id" -> id)
                   requestor ! "ok"
+                 
+                  context.system.scheduler.scheduleOnce(Duration(5, "seconds") ,trafficActor.ref, TrafficActor.ProcessDownloadedSpeedData(2)) 
+                  
                 }
               case Some(x) => requestor ! "ok - discarded as duplicated"
             }

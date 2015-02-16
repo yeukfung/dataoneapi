@@ -33,8 +33,8 @@ class LogStash::Filters::Restapi < LogStash::Filters::Base
     return unless filter?(event)
 
     if @url
-      url = event.sprintf(@url)
-      response = APICache.get(url)
+      myurl = event.sprintf(@url)
+      response = APICache.get(myurl)
       event["resp"] = response.encode("UTF-8")
     end
 

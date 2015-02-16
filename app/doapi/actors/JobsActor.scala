@@ -9,10 +9,11 @@ import doapi.actors.common.Indexing
 class JobsActor @Inject() (trafficActor: ActorInstance[TrafficActor]) extends ActorStack {
 
   def ops = {
+    case "run15s" =>
+      trafficActor.ref ! TrafficActor.DownloadSpeedData
     case "run10m" =>
       trafficActor.ref ! TrafficActor.SyncLinkData
     case "run1m" =>
-      trafficActor.ref ! TrafficActor.DownloadSpeedData
       trafficActor.ref ! TrafficActor.ProcessDownloadedSpeedData(5)
     case "runOnce" =>
       trafficActor.ref ! "housekeep"

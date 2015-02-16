@@ -1,0 +1,22 @@
+@(title: String, convertForm: Form[KibanaConvertData])
+
+@import helper._
+
+@main(title) {
+
+<p>This is a tools to convert the kibana template to readonly</p>
+<div id="source">
+
+ <form action="/tools/kibana/convert" method="post">
+ 
+ <p><textarea name="src" rows="15" cols="100"></textarea></p>
+ 
+ <input type="submit"/>
+ </form>
+</div>
+
+<div id="target">
+
+</div>
+
+}

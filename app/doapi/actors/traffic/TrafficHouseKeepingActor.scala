@@ -25,7 +25,7 @@ class TrafficHouseKeepingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, traf
   def ops = {
     case "housekeep" =>
       l.info(s"performing house keeping for $DAYS")
-      val q = qGt("created", System.currentTimeMillis() - TRASH_AFTER_DAYS_Millis)
+      val q = qLt("created", System.currentTimeMillis() - TRASH_AFTER_DAYS_Millis)
       // remove all expired
       trafficSpeedDao.batchDelete(q) map { le =>
         if (!le.ok) {
@@ -35,7 +35,9 @@ class TrafficHouseKeepingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, traf
 
       // remove all data over 3 days
       trafficSpeedDataDao.batchDelete(q) map { le =>
-        l.error(s"deleteing the trafficSpeedDataDao with query: $q with errMsg: ${le.errMsg.getOrElse("Unknown")}")
+        if (!le.ok) {
+          l.error(s"deleteing the trafficSpeedDataDao with query: $q with errMsg: ${le.errMsg.getOrElse("Unknown")}")
+        }
       }
 
       context.system.scheduler.scheduleOnce(HOUSEKEEP_INTERVAL, self, "housekeep")

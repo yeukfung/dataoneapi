@@ -31,6 +31,7 @@ object Global extends GlobalSettings {
     Logger.info("activating the scheduler")
     val af = globals.injector.getInstance(classOf[GuiceActorFactory])
     Akka.system(app).scheduler.schedule(2 seconds, 10 minutes, af.jobsActor.ref, "run10m")
+    Akka.system(app).scheduler.schedule(8 seconds, 15 seconds, af.jobsActor.ref, "run15s")
     Akka.system(app).scheduler.schedule(10 seconds, 1 minutes, af.jobsActor.ref, "run1m")
     af.jobsActor.ref ! "runOnce"
   }

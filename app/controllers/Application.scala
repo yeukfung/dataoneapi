@@ -32,6 +32,8 @@ object Application extends Controller {
 
 }
 
+object ReportAssets extends AssetsBuilder
+
 class Persons extends RESTReactiveMongoController[JsObject] {
   val coll = db.collection[JSONCollection]("demo1")
 }
