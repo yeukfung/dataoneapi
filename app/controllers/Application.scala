@@ -30,6 +30,9 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
 
+  def realtime = Action {
+    Ok(views.html.realtime(""))
+  }
 }
 
 object ReportAssets extends AssetsBuilder
@@ -44,18 +47,19 @@ object PersonsAPI extends RESTReactiveMongoRouterContoller {
 
 case class JsOutTrafficLink(
   linkId: String,
+  startLat: Option[Double],
+  startLng: Option[Double],
+  endLat: Option[Double],
+  endLng: Option[Double],
   startNode: String,
+  endNode: String,
   startNodeEastings: Double,
   startNodeNorthings: Double,
-  endNode: String,
   endNodeEastings: Double,
   endNodeNorthings: Double,
   region: String,
-  roadType: String,
-  startLat: Option[Double],
-  startLong: Option[Double],
-  endLat: Option[Double],
-  endLong: Option[Double])
+  roadType: String
+  )
 
 case class JsOutSpeedData(
   linkId: String,

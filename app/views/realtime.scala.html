@@ -1,0 +1,35 @@
+@(title:String)
+
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>@title</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+		
+		
+	<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/realtime.css")">		
+		
+	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key="></script>
+    <script language="javascript" type="text/javascript" src="@routes.Assets.at("javascripts/realtime.js")"></script>
+  </head>
+  <body>
+  
+	<!-- an empty div for the map -->
+	<div id="map-canvas"></div>
+
+
+ 	<div id="save-widget">
+      <h4>HK Real Time Traffic <br/>香港即時交通</h4>
+      <p>
+      	<input class="areaCheckBox" type="checkbox" name="HK" checked> Hong Kong (香港)<br/>
+      	<input class="areaCheckBox" type="checkbox" name="K" checked> Kowloon (九龍)<br/>
+      	<input class="areaCheckBox" type="checkbox" name="ST" checked> ShaTin (沙田)<br/>
+      	<input class="areaCheckBox" type="checkbox" name="TM" checked> Tuen Mum (屯門)<br/>
+      </p>
+    </div>
+    
+  </body>
+</html>

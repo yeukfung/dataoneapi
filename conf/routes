@@ -4,6 +4,8 @@
 
 # Home page
 
+GET		/realtime					controllers.Application.realtime
+
 GET		/reports/*file				controllers.ReportAssets.at(path="/public/kibana", file)
 
 GET    /tools/kibana                    controllers.ESTools.index
