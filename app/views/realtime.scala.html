@@ -7,12 +7,12 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
 		
-		
+	<link rel="stylesheet" media="screen" href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")">
 	<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/realtime.css")">		
-		
 	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key="></script>
+	<script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.js")" type="text/javascript"></script>	
     <script language="javascript" type="text/javascript" src="@routes.Assets.at("javascripts/realtime.js")"></script>
   </head>
   <body>
@@ -21,14 +21,21 @@
 	<div id="map-canvas"></div>
 
 
- 	<div id="save-widget">
-      <h4>HK Real Time Traffic <br/>香港即時交通</h4>
-      <p>
-      	<input class="areaCheckBox" type="checkbox" name="HK" checked> Hong Kong (香港)<br/>
-      	<input class="areaCheckBox" type="checkbox" name="K" checked> Kowloon (九龍)<br/>
-      	<input class="areaCheckBox" type="checkbox" name="ST" checked> ShaTin (沙田)<br/>
-      	<input class="areaCheckBox" type="checkbox" name="TM" checked> Tuen Mum (屯門)<br/>
-      </p>
+ 	<div id="info-widget">
+ 	<div class="btn-group dropup">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+  </button>
+  <div id="title">HK Real Time Traffic <br/>香港即時交通</div>
+  <ul class="dropdown-menu" role="menu">
+      <li><input class="areaCheckBox" type="checkbox" name="HK" checked> &nbsp;Hong Kong (香港)</li>
+      	<li><input class="areaCheckBox" type="checkbox" name="K" checked> &nbsp;Kowloon (九龍)</li>
+      	<li><input class="areaCheckBox" type="checkbox" name="ST" checked> &nbsp;ShaTin (沙田)</li>
+      	<li><input class="areaCheckBox" type="checkbox" name="TM" checked> &nbsp;Tuen Mum (屯門)</li>
+  </ul>
+</div>
+      <div id="time"><span class="glyphicon glyphicon-time" aria-hidden="true"></span> <span id="updatedTime"> </span></div>
+      
+       
     </div>
     
   </body>

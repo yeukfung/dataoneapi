@@ -5,9 +5,11 @@ import com.google.inject.Inject
 import akkaguice.ActorInstance
 import doapi.actors.traffic.TrafficActor
 import doapi.actors.common.Indexing
+import amlibs.core.actor.NamedActorStack
 
-class JobsActor @Inject() (trafficActor: ActorInstance[TrafficActor]) extends ActorStack {
+class JobsActor @Inject() (trafficActor: ActorInstance[TrafficActor]) extends NamedActorStack {
 
+  val actorName = "JobsActor"
   def ops = {
     case "run15s" =>
       trafficActor.ref ! TrafficActor.DownloadSpeedData

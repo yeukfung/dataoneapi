@@ -4,6 +4,25 @@
  * www.pauldessert.com | www.seedtip.com
  */
 
+function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  var expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ')
+      c = c.substring(1);
+    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+  }
+  return "";
+}
+
 $(function() {
 
   var marketId = []; // returned from the API
@@ -19,6 +38,30 @@ $(function() {
   var pos;
   var userCords;
   var tempMarkerHolder = [];
+
+  var filterState = {
+    "HK": true,
+    "K": true,
+    "ST": true,
+    "TM": true,
+  };
+
+  var loadFilterStateFromCookie = function() {
+    var keys = ["HK", "K", "ST", "TM"];
+    for ( var key in keys) {
+
+      var tag = keys[key];
+      var cookieValue = getCookie(tag);
+      console.log(cookieValue);
+      if (cookieValue == "false")
+        filterState[tag] = false;
+      else
+        filterState[tag] = true;
+      $(".areaCheckBox[name=" + tag + "]").prop("checked", filterState[tag]);
+    }
+
+  };
+  loadFilterStateFromCookie();
 
   // map options
   var mapOptions = {
@@ -52,8 +95,8 @@ $(function() {
   };
 
   var resolveRoadType = function(roadType) {
-    if (roadType == "MAJOR ROUTE") return 4;
-    return 2;
+    if (roadType == "MAJOR ROUTE") return 5;
+    return 3;
   };
 
   var deleteAllLines = function() {
@@ -64,6 +107,14 @@ $(function() {
   };
 
   var isInitialRequest = true;
+
+  var onMouseEnter = function(e) {
+    $("#infoSpeed").text("demo");
+  };
+
+  var onMouseLeave = function(e) {
+    $("#infoSpeed").text("--");
+  };
 
   var fnProcessData = function(data) {
     // alert('hi');
@@ -102,6 +153,13 @@ $(function() {
       });
       // console.log("added to map");
 
+      link.customdata = data[key];
+
+      google.maps.event.addListener(link, 'mouseover', onMouseEnter);
+
+      // assuming you want the InfoWindow to close on mouseout
+      google.maps.event.addListener(link, 'mouseout', onMouseLeave);
+
       allLinks.push(link);
       allLatlng.push(startLatLng, endLatLng);
 
@@ -122,22 +180,21 @@ $(function() {
       isInitialRequest = false;
       allLatlng = [];
     }
-
-    console.log("latest data time: " + latestTime);
+    $("#updatedTime").text(latestTime);
+    // console.log("latest data time: " + latestTime);
 
   };
 
   var fnFilter = function() {
     // refresh
     var filteredData = [];
-    $(".areaCheckBox").each(function(e) {
-      var key = $(this).attr("name");
-      var checked = $(this).prop("checked");
+
+    for ( var key in filterState) {
+      var checked = filterState[key];
       console.log("key: " + key + "checked: " + checked);
       if (checked) filteredData = filteredData.concat(allData[key]);
-    });
+    }
 
-    isInitialRequest = true;
     return filteredData;
 
   };
@@ -157,7 +214,7 @@ $(function() {
           "TM": []
         };
 
-        for (var key in freshData) {
+        for ( var key in freshData) {
           allData[freshData[key].region].push(freshData[key]);
         }
         console.log(allData);
@@ -173,7 +230,14 @@ $(function() {
   setInterval(fnReload, 20000);
 
   $(".areaCheckBox").change(function(e) {
+    var key = $(this).attr("name");
+    var checked = $(this).prop("checked");
+
+    filterState[key] = checked;
+    setCookie(key, checked, 30);
+
     var filteredData = fnFilter();
+    isInitialRequest = true;
 
     fnProcessData(filteredData);
   });

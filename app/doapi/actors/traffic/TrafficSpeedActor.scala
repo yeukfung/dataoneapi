@@ -13,11 +13,13 @@ import play.api.libs.json.Json
 import amlibs.core.playspecific.PlayMixin
 import akkaguice.ActorInstance
 import scala.concurrent.duration.Duration
+import amlibs.core.actor.NamedActorStack
 
-class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao, trafficActor: ActorInstance[TrafficActor]) extends ActorStack with PlayMixin {
+class TrafficSpeedActor @Inject() (speedmapDao: TrafficSpeedDao, trafficActor: ActorInstance[TrafficActor]) extends NamedActorStack with PlayMixin {
 
   import JsonQueryHelper._
 
+  val actorName = "TrafficSpeedActor"
   val SPEEDXML_URL = conf.getString("dataoneapi.traffic.speedxmlurl").getOrElse("http://data.one.gov.hk/others/td/speedmap.xml")
 
   def ops = {

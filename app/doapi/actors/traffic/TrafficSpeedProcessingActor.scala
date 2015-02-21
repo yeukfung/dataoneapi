@@ -23,11 +23,13 @@ import doapi.actors.common.Indexing
 import akkaguice.ActorInstance
 import scala.concurrent.duration.Duration
 import doapi.actors.common.JsDataLogging
+import amlibs.core.actor.NamedActorStack
 
 class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
                                              trafficSpeedDataDao: TrafficSpeedDataDao,
-                                             trafficActor: ActorInstance[TrafficActor]) extends ActorStack with PlayMixin {
+                                             trafficActor: ActorInstance[TrafficActor]) extends NamedActorStack with PlayMixin {
 
+  val actorName = "TrafficSpeedProcessingActor"
   val indexingEnabled = conf.getBoolean("indexing.enabled").getOrElse(false)
   def ops = {
 
@@ -51,11 +53,12 @@ class TrafficSpeedProcessingActor @Inject() (trafficSpeedDao: TrafficSpeedDao,
 
 }
 
-class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao) extends ActorStack with JsDataLogging {
+class TrafficSpeedProcessingWorker(dao: TrafficSpeedDao, speedDataDao: TrafficSpeedDataDao) extends NamedActorStack with JsDataLogging {
 
   import scala.xml._
   import doapi.models.traffic.TrafficModels.Formats._
 
+  val actorName = "TrafficSpeedProcessingWorker"
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
   def ops = {
     case (item: play.api.libs.json.JsObject, id: String) =>

@@ -109,29 +109,12 @@ ul li {
 	line-height: 1.9;
 }
 
-.zipSearch {
-	display: none;
-}
 
-/* Popup */
-.markerPop {
-	
-}
-
-.twitter {
-	float: left;
-}
-
-.facebook {
-	float: left;
-	width: 150px !important;
-	height: 35px !important;
-}
 
 /* tablets and desktop */
 @media only screen and (min-width: 361px) {
 	p {
-		margin-bottom: 15px;
+		/*margin-bottom: 15px;*/
 		line-height: 20px;
 	}
 	#map-canvas {
@@ -231,12 +214,14 @@ ul li {
 		border: 1px solid #BE757E;
 	}
 }
-#save-widget h4{
+#info-widget #title{
 	font-weight:bold;
-	font-size: 15px;
+	font-size: 13px;
+	float: left;
+	padding: 5px 5px 5px 10px;
 }
-#save-widget {
-	width: 200px;
+#info-widget {
+	width: 210px;
 	box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px;
 	background-color: white;
 	padding: 10px;
@@ -244,5 +229,13 @@ ul li {
 	font-size: 13px;
 	margin: 15px;
 	position: absolute;
-	top: 0;
+	bottom: 0px;
+	left: 0px;
+}
+
+ul.dropdown-menu {
+	padding-left: 10px;
+}
+#time {
+	padding-top:5px;
 }

@@ -4,9 +4,9 @@
 
 # Home page
 
-GET		/realtime					controllers.Application.realtime
+GET    /realtime                        controllers.Application.realtime
 
-GET		/reports/*file				controllers.ReportAssets.at(path="/public/kibana", file)
+GET    /reports/*file                   controllers.ReportAssets.at(path="/public/kibana", file)
 
 GET    /tools/kibana                    controllers.ESTools.index
 
@@ -15,9 +15,14 @@ POST   /tools/kibana/convert            controllers.ESTools.convert
 
 GET    /api/traffic/speedmap/latest     controllers.TrafficSpeedAPI.latest
 
+GET    /api/traffic/linknodes/maps      controllers.TrafficLinkNodeAPI.maps
+
 GET    /api/traffic/linknodes/:linkId   controllers.TrafficLinkNodeAPI.findByLinkId(linkId:String)
 
 GET    /system/patch/created            @controllers.PatchController.patchCreatedDate
+
+
+GET    /api/traffic/linknodes           controllers.TrafficLinkNodeAPI.find
 
 GET    /                                controllers.Application.index
 

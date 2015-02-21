@@ -4,6 +4,7 @@ import amlibs.core.actor.ActorStack
 import com.google.inject.Inject
 import akkaguice.ActorInstance
 import doapi.actors.common.Indexing
+import amlibs.core.actor.NamedActorStack
 
 object TrafficActor {
   case object DownloadSpeedData
@@ -17,10 +18,12 @@ class TrafficActor @Inject() (speedActor: ActorInstance[TrafficSpeedActor],
                               syncLDActor: ActorInstance[TrafficLinkActor],
                               processingActor: ActorInstance[TrafficSpeedProcessingActor],
                               indexingActor: ActorInstance[TrafficSpeedDataIndexingActor],
-                              trafficHouseKeep: ActorInstance[TrafficHouseKeepingActor]) extends ActorStack {
+                              trafficHouseKeep: ActorInstance[TrafficHouseKeepingActor]) extends NamedActorStack {
 
   import TrafficActor._
 
+  val actorName = "TrafficActor"
+  
   def ops = {
     case msg: Indexing.PerformIndexing =>
       indexingActor.ref forward msg

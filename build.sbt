@@ -4,7 +4,7 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.1"
 
 lazy val njRepo = Seq(
     "Mandubian repository snapshots" at "https://github.com/mandubian/mandubian-mvn/raw/master/snapshots/",
@@ -16,6 +16,8 @@ lazy val njRepo = Seq(
 resolvers in ThisBuild ++= njRepo
     
 libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-actor" % "2.3.4",
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.4",
   jdbc,
   anorm,
   cache,

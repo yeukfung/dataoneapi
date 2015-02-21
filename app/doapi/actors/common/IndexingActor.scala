@@ -4,8 +4,9 @@ import amlibs.core.actor.ActorStack
 import play.api.Logger
 import play.api.libs.json.JsObject
 import play.api.libs.json.Json
+import amlibs.core.actor.NamedActorStack
 
-trait IndexingActor extends ActorStack {
+trait IndexingActor extends NamedActorStack {
 
   def ver:String
   

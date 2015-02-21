@@ -58,8 +58,7 @@ case class JsOutTrafficLink(
   endNodeEastings: Double,
   endNodeNorthings: Double,
   region: String,
-  roadType: String
-  )
+  roadType: String)
 
 case class JsOutSpeedData(
   linkId: String,
@@ -114,7 +113,9 @@ object TrafficSpeedAPI extends RESTReactiveMongoRouterContoller {
   def latest = controller.latest
 }
 
-class TrafficLinkIdController @Inject() (linkDao: TrafficLinkDao) extends RESTReactiveMongoController[JsObject]() {
+import TrafficJsOutFormat._
+
+class TrafficLinkIdController @Inject() (linkDao: TrafficLinkDao) extends RESTReactiveMongoController[JsOutTrafficLink]() {
 
   import JsonQueryHelper._
   import play.api.libs.json._
@@ -133,6 +134,16 @@ class TrafficLinkIdController @Inject() (linkDao: TrafficLinkDao) extends RESTRe
     }
   }
 
+  def maps = Action.async {
+    //    Logger.info("request: toMap")
+    //  Future.successful(Ok("good"))
+    res.find(Json.obj(), 1000, 0).map { l =>
+      Logger.info("got records: " + l.size)
+      val js = l.foldLeft(Json.obj())((acc, item) => acc ++ Json.obj(item._1.linkId -> item._1))
+      Ok(js)
+    }
+  }
+
 }
 
 object TrafficLinkNodeAPI extends RESTReactiveMongoRouterContoller {
@@ -140,4 +151,7 @@ object TrafficLinkNodeAPI extends RESTReactiveMongoRouterContoller {
   def resController = controller
 
   def findByLinkId(linkId: String) = controller.findByLinkId(linkId)
+  def find = controller.find
+
+  def maps = controller.maps
 }

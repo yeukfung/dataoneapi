@@ -30,6 +30,7 @@ class TrafficSpeedDataIndexingActor @Inject() (daoSpeedData: TrafficSpeedDataDao
                                                daoLinkMeta: TrafficLinkMetaDao,
                                                daoCode: TrafficSpeedDataCodeDao) extends IndexingActor with ESMixin {
 
+  val actorName = "TrafficSpeedDataIndexingActor"
   val ver = "1"
 
   val IDX = "traffic"

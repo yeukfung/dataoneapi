@@ -8,12 +8,13 @@ import scala.concurrent.duration.Duration
 import play.api.libs.json.Json
 import amlibs.core.daos.JsonQueryHelper
 import amlibs.core.playspecific.PlayMixin
+import amlibs.core.actor.NamedActorStack
 
 /**
  * this actor aims to house keep the data for max last 3 days
  */
 
-class TrafficHouseKeepingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, trafficSpeedDataDao: TrafficSpeedDataDao) extends ActorStack with PlayMixin {
+class TrafficHouseKeepingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, trafficSpeedDataDao: TrafficSpeedDataDao) extends NamedActorStack with PlayMixin {
 
   val HOUSEKEEP_INTERVAL = Duration(1, "hour")
 
@@ -22,6 +23,7 @@ class TrafficHouseKeepingActor @Inject() (trafficSpeedDao: TrafficSpeedDao, traf
 
   import JsonQueryHelper._
 
+  val actorName = "TrafficHouseKeepingActor"
   def ops = {
     case "housekeep" =>
       l.info(s"performing house keeping for $DAYS")

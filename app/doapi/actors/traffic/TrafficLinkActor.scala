@@ -15,6 +15,7 @@ import play.api.libs.json.JsObject
 import scala.concurrent.duration.Duration
 import amlibs.core.playspecific.PlayMixin
 import doapi.models.ModelCommon
+import amlibs.core.actor.NamedActorStack
 
 /**
  * an actor to keep track of the link node from following link:
@@ -88,11 +89,12 @@ object MyWriter {
   })
 }
 
-class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: ActorInstance[CoordinateConvertActor]) extends ActorStack with PlayMixin {
+class TrafficLinkActor @Inject() (trafficLinkDao: TrafficLinkDao, convertActor: ActorInstance[CoordinateConvertActor]) extends NamedActorStack with PlayMixin {
   import TrafficLinkActor._
   import MyWriter._
   import doapi.actors.traffic.CoordinateConvertActor._
 
+  val actorName = "TrafficLinkActor"
   def ops = {
     case req: HK1980GRIDtoWGS84Resp =>
       req.reqMeta.map { m =>

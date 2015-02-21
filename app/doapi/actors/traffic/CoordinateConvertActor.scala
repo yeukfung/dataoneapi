@@ -17,6 +17,7 @@ import com.google.inject.Inject
 import amlibs.core.daos.JsonQueryHelper
 import play.api.libs.json.Json
 import scala.concurrent.Future
+import amlibs.core.actor.NamedActorStack
 
 /**
  * from website:
@@ -46,10 +47,11 @@ object CoordinateConvertActor {
   }
 }
 
-class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) extends ActorStack with PlayMixin {
+class CoordinateConvertActor @Inject() (coordinateInfoDao: CoordinateInfoDao) extends NamedActorStack with PlayMixin {
   import CoordinateConvertActor._
   import JsonQueryHelper._
 
+  val actorName = "CoordinateConvertActor"
   val formUrl = conf.getString("dataoneapi.traffic.convertFormUrl").getOrElse("http://www.geodetic.gov.hk/smo/tform/tform.aspx")
 
   val BATCH_SIZE = 10
