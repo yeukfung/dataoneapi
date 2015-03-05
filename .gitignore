@@ -26,3 +26,4 @@ temp
 !public/*
 !scripts/downloads/*.sh
 scripts/downloads
+*.gz

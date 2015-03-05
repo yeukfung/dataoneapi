@@ -16,8 +16,7 @@ lazy val njRepo = Seq(
 resolvers in ThisBuild ++= njRepo
     
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.3.4",
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.4",
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.4" % "test",
   jdbc,
   anorm,
   cache,
